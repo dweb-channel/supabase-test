@@ -1,0 +1,345 @@
+lzc-sdk-version: "0.1"
+name: supabase
+package: cloud.lazy.app.supabase
+version: 1.25.4
+description:
+  开箱即用的开源后端：以 PostgreSQL 为核心，提供认证、实时、存储、自动 API 与
+  Serverless，使你用最少后端工作量快速交付现代 Web/移动/AI 应用。
+homepage:
+  Supabase 是 Postgres 开发平台。您可以使用 Postgres 数据库、身份验证、即时
+  API、边缘函数、实时订阅、存储和向量嵌入来启动您的项目。
+author: supabase
+application:
+  subdomain: supabase
+  background_task: false
+  multi_instance: false
+  gpu_accel: false
+  kvm_accel: false
+  usb_accel: false
+  routes:
+    - /=http://localhost:8000/
+    - /kong/=http://localhost:8443/kong/
+    - /analytics/=http://localhost:4000/analytics/
+  ingress:
+    - protocol: tcp
+      port: 5432
+      service: supavisor
+    - protocol: tcp
+      port: 6543
+      service: supavisor
+services:
+  studio:
+    image: registry.lazycat.cloud/u95011260/supabase/studio:dbf8b30956d293f6
+    environment:
+      - STUDIO_PG_META_URL=http://localhost:8080
+      - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - DEFAULT_ORGANIZATION_NAME=Default Organization
+      - DEFAULT_PROJECT_NAME=Default Project
+      - OPENAI_API_KEY=
+      - SUPABASE_URL=http://localhost:8000
+      - SUPABASE_PUBLIC_URL=http://localhost:8000
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
+      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
+      - AUTH_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - LOGFLARE_PRIVATE_ACCESS_TOKEN=your-super-secret-and-long-logflare-key-private
+      - LOGFLARE_URL=http://localhost:4000
+      - NEXT_PUBLIC_ENABLE_LOGS=true
+      - NEXT_ANALYTICS_BACKEND_PROVIDER=postgres
+    depends_on:
+      - analytics
+    health_check:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:3000/api/platform/profile').then((r) => {if
+          (r.status !== 200) throw new Error(r.status)})
+  kong:
+    image: registry.lazycat.cloud/u95011260/library/kong:783ea9c34b9b0f5c
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/home/kong/kong.yml
+      - KONG_DNS_ORDER=LAST,A,CNAME
+      - KONG_PLUGINS=request-transformer,cors,key-auth,acl,basic-auth
+      - KONG_NGINX_PROXY_PROXY_BUFFER_SIZE=160k
+      - KONG_NGINX_PROXY_PROXY_BUFFERS=64 160k
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
+      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
+      - DASHBOARD_USERNAME=supabase
+      - DASHBOARD_PASSWORD=this_password_is_insecure_and_should_be_updated
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/config/kong.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
+    depends_on:
+      - analytics
+    binds:
+      - /lzcapp/pkg/content/volumes/api:/home/kong/config
+  auth:
+    image: registry.lazycat.cloud/u95011260/supabase/gotrue:97e34b8931c30ba1
+    environment:
+      - GOTRUE_API_HOST=0.0.0.0
+      - GOTRUE_API_PORT=9999
+      - API_EXTERNAL_URL=http://localhost:8000
+      - GOTRUE_DB_DRIVER=postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - GOTRUE_SITE_URL=http://localhost:3000
+      - GOTRUE_URI_ALLOW_LIST=
+      - GOTRUE_DISABLE_SIGNUP=false
+      - GOTRUE_JWT_ADMIN_ROLES=service_role
+      - GOTRUE_JWT_AUD=authenticated
+      - GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated
+      - GOTRUE_JWT_EXP=3600
+      - GOTRUE_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - GOTRUE_EXTERNAL_EMAIL_ENABLED=true
+      - GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED=false
+      - GOTRUE_MAILER_AUTOCONFIRM=false
+      - GOTRUE_SMTP_ADMIN_EMAIL=admin@example.com
+      - GOTRUE_SMTP_HOST=supabase-mail
+      - GOTRUE_SMTP_PORT=2500
+      - GOTRUE_SMTP_USER=fake_mail_user
+      - GOTRUE_SMTP_PASS=fake_mail_password
+      - GOTRUE_SMTP_SENDER_NAME=fake_sender
+      - GOTRUE_MAILER_URLPATHS_INVITE=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_CONFIRMATION=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_RECOVERY=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE=/auth/v1/verify
+      - GOTRUE_EXTERNAL_PHONE_ENABLED=true
+      - GOTRUE_SMS_AUTOCONFIRM=true
+    depends_on:
+      - db
+      - analytics
+    health_check:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:9999/health
+  rest:
+    image: registry.lazycat.cloud/u95011260/postgrest/postgrest:56754e2f0bb91158
+    environment:
+      - PGRST_DB_URI=postgres://authenticator:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - PGRST_DB_SCHEMAS=public,storage,graphql_public
+      - PGRST_DB_ANON_ROLE=anon
+      - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - PGRST_DB_USE_LEGACY_GUCS=false
+      - PGRST_APP_SETTINGS_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - PGRST_APP_SETTINGS_JWT_EXP=3600
+    command: postgrest
+    depends_on:
+      - db
+      - analytics
+  realtime:
+    image: registry.lazycat.cloud/u95011260/supabase/realtime:0546ae3e8e4d3ae3
+    environment:
+      - PORT=4000
+      - DB_HOST=localhost
+      - DB_PORT=5432
+      - DB_USER=supabase_admin
+      - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - DB_NAME=postgres
+      - DB_AFTER_CONNECT_QUERY=SET search_path TO _realtime
+      - DB_ENC_KEY=supabaserealtime
+      - API_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - SECRET_KEY_BASE=UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
+      - ERL_AFLAGS=-proto_dist inet_tcp
+      - DNS_NODES=''
+      - RLIMIT_NOFILE=10000
+      - APP_NAME=realtime
+      - SEED_SELF_HOST=true
+      - RUN_JANITOR=true
+    depends_on:
+      - db
+      - analytics
+    health_check:
+      test:
+        - CMD
+        - curl
+        - -sSfL
+        - --head
+        - -o
+        - /dev/null
+        - -H
+        - "Authorization: Bearer
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwK\
+          ICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKI\
+          CAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8\
+          Bu4GE"
+        - http://localhost:4000/api/tenants/realtime-dev/health
+  storage:
+    image: registry.lazycat.cloud/u95011260/supabase/storage-api:5bf488e768d809c4
+    environment:
+      - ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
+      - SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
+      - POSTGREST_URL=http://localhost:3000
+      - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - DATABASE_URL=postgres://supabase_storage_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - FILE_SIZE_LIMIT=52428800
+      - STORAGE_BACKEND=file
+      - FILE_STORAGE_BACKEND_PATH=/var/lib/storage
+      - TENANT_ID=stub
+      - REGION=stub
+      - GLOBAL_S3_BUCKET=stub
+      - ENABLE_IMAGE_TRANSFORMATION=true
+      - IMGPROXY_URL=http://localhost:5001
+    depends_on:
+      - db
+      - rest
+      - imgproxy
+    binds:
+      - /lzcapp/var/supabase-storage:/var/lib/storage
+    health_check:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:5000/status
+  imgproxy:
+    image: registry.lazycat.cloud/u95011260/darthsim/imgproxy:0cd0d8b94d90b5ab
+    environment:
+      - IMGPROXY_BIND=:5001
+      - IMGPROXY_LOCAL_FILESYSTEM_ROOT=/
+      - IMGPROXY_USE_ETAG=true
+      - IMGPROXY_ENABLE_WEBP_DETECTION=true
+    binds:
+      - /lzcapp/var/supabase-storage:/var/lib/storage
+    health_check:
+      test:
+        - CMD
+        - imgproxy
+        - health
+  meta:
+    image: registry.lazycat.cloud/u95011260/supabase/postgres-meta:bc9666516cca28bf
+    environment:
+      - PG_META_PORT=8080
+      - PG_META_DB_HOST=localhost
+      - PG_META_DB_PORT=5432
+      - PG_META_DB_NAME=postgres
+      - PG_META_DB_USER=supabase_admin
+      - PG_META_DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+    depends_on:
+      - db
+      - analytics
+  functions:
+    image: registry.lazycat.cloud/u95011260/supabase/edge-runtime:d511375729d5f8f8
+    environment:
+      - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - SUPABASE_URL=http://localhost:8000
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
+      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
+      - SUPABASE_DB_URL=postgresql://postgres:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - VERIFY_JWT=false
+    command: start --main-service /home/deno/functions/main
+    depends_on:
+      - analytics
+    binds:
+      - /lzcapp/pkg/content/volumes/functions:/home/deno/functions
+  analytics:
+    image: registry.lazycat.cloud/u95011260/supabase/logflare:a227756f2691d80d
+    environment:
+      - LOGFLARE_NODE_HOST=localhost
+      - DB_USERNAME=supabase_admin
+      - DB_DATABASE=_supabase
+      - DB_HOSTNAME=localhost
+      - DB_PORT=5432
+      - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - DB_SCHEMA=_analytics
+      - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
+      - LOGFLARE_PRIVATE_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
+      - LOGFLARE_SINGLE_TENANT=true
+      - LOGFLARE_SUPABASE_MODE=true
+      - LOGFLARE_MIN_CLUSTER_SIZE=1
+      - POSTGRES_BACKEND_URL=postgresql://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/_supabase
+      - POSTGRES_BACKEND_SCHEMA=_analytics
+      - LOGFLARE_FEATURE_FLAG_OVERRIDE=multibackend=true
+    depends_on:
+      - db
+    health_check:
+      test:
+        - CMD
+        - curl
+        - http://localhost:4000/health
+  db:
+    image: registry.lazycat.cloud/u95011260/supabase/postgres:3529b4327368f298
+    environment:
+      - POSTGRES_HOST=0.0.0.0
+      - PGPORT=5432
+      - POSTGRES_PORT=5432
+      - PGPASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - PGDATABASE=postgres
+      - POSTGRES_DB=postgres
+      - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - JWT_EXP=3600
+    command: postgres -c log_min_messages=fatal
+    binds:
+      - /lzcapp/pkg/content/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql
+      - /lzcapp/pkg/content/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql
+      - /lzcapp/pkg/content/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql
+      - /lzcapp/pkg/content/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql
+      - /lzcapp/var/supabase-data:/var/lib/postgresql/data
+      - /lzcapp/pkg/content/volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql
+      - /lzcapp/pkg/content/volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql
+      - /lzcapp/pkg/content/volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql
+      - /lzcapp/var/postgresql-custom:/etc/postgresql-custom
+    health_check:
+      test:
+        - CMD
+        - pg_isready
+        - -U
+        - postgres
+        - -h
+        - localhost
+  vector:
+    image: registry.lazycat.cloud/u95011260/timberio/vector:68c5884c3e523f6f
+    environment:
+      - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
+    command: --config /etc/vector/vector.toml
+    binds:
+      - /lzcapp/pkg/content/volumes/logs:/etc/vector
+      - /lzcapp/var/run/docker.sock:/var/run/docker.sock
+    health_check:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:9001/health
+  supavisor:
+    image: registry.lazycat.cloud/u95011260/supabase/supavisor:24de9bc097db8336
+    environment:
+      - PORT=4000
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - DATABASE_URL=ecto://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/_supabase
+      - CLUSTER_POSTGRES=true
+      - SECRET_KEY_BASE=UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
+      - VAULT_ENC_KEY=ZDQzNjgzNzljMTFiNmMyMDk5NDBlYTBh
+      - API_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - METRICS_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - REGION=local
+      - ERL_AFLAGS=-proto_dist inet_tcp
+      - POOLER_TENANT_ID=supabase-project
+      - POOLER_DEFAULT_POOL_SIZE=20
+      - POOLER_MAX_CLIENT_CONN=100
+      - POOLER_POOL_MODE=transaction
+      - DB_POOL_SIZE=5
+    command: /bin/sh -c /app/bin/migrate && /app/bin/supavisor eval "$$(cat
+      /etc/pooler/config/pooler.exs)" && /app/bin/server
+    depends_on:
+      - db
+      - analytics
+    binds:
+      - /lzcapp/pkg/content/volumes/pooler:/etc/pooler/config
+    health_check:
+      test:
+        - CMD
+        - curl
+        - -sSfL
+        - --head
+        - -o
+        - /dev/null
+        - http://localhost:4000/api/health

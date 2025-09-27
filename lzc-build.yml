@@ -1,0 +1,90 @@
+# Supabase LazyCAT 构建配置
+# 整个文件中，可以通过 ${var} 的方式，使用 manifest 字段指定的文件定义的值
+
+# buildscript: Supabase 不需要构建步骤，直接使用容器镜像
+# 对于 Supabase，我们只需要准备配置文件和卷数据
+buildscript: ""
+
+# manifest: 指定 lpk 包的 manifest.yml 文件路径
+manifest: ./lzc-manifest.yml
+
+# contentdir: 指定打包的内容，将会打包到 lpk 中
+# 对于 Supabase，我们需要打包配置文件和卷数据
+contentdir: ./volumes
+
+# pkgout: lpk 包的输出路径
+pkgout: ./
+
+# icon: Supabase 图标
+icon: ./icon.png
+
+# 环境变量配置说明
+# 用户在安装时需要配置以下环境变量：
+#
+# 必需的安全配置:
+# - POSTGRES_PASSWORD: PostgreSQL 数据库密码
+# - JWT_SECRET: JWT 签名密钥 (至少32字符)
+# - ANON_KEY: 匿名访问密钥
+# - SERVICE_ROLE_KEY: 服务角色密钥
+# - DASHBOARD_USERNAME: 管理面板用户名
+# - DASHBOARD_PASSWORD: 管理面板密码
+#
+# 应用配置:
+# - SUPABASE_PUBLIC_URL: 公开访问URL
+# - SITE_URL: 前端应用URL
+# - API_EXTERNAL_URL: API外部访问URL
+#
+# 可选配置:
+# - STUDIO_DEFAULT_ORGANIZATION: 默认组织名称
+# - STUDIO_DEFAULT_PROJECT: 默认项目名称
+# - OPENAI_API_KEY: OpenAI API密钥 (用于AI功能)
+# - SMTP_*: 邮件服务配置
+# - ENABLE_*: 功能开关配置
+
+# devshell: 开发环境配置
+# 为 Supabase 开发提供便利的开发环境
+# devshell:
+#   image: registry.lazycat.cloud/lzc-cli/devshell:v0.0.5
+#   routes:
+#     - /=http://127.0.0.1:3000
+#     - /studio=http://127.0.0.1:3000
+#   environment:
+#     - NODE_ENV=development
+#     - SUPABASE_DEV_MODE=true
+
+# devshell 指定 image 的情况
+# devshell:
+#   routes:
+#     - /=http://127.0.0.1:3000
+#   image: registry.lazycat.cloud/lzc-cli/devshell:v0.0.5
+
+# devshell 指定构建Dockerfile
+# image 字段如果没有定义，将默认使用 ${package}-devshell:${version}
+# devshell:
+#   routes:
+#     - /=http://127.0.0.1:3000
+#   image: ${package}-devshell:${version}
+#   pull_policy: build
+#   build: .
+
+# dvshell 指定开发依赖的情况
+# 这种情况下，选用 alpine:latest 作为基础镜像，在 dependencies 中添加所需要的开发依赖即可
+# 如果 dependencies 和 build 同时存在，将会优先使用 dependencies
+devshell:
+  routes:
+    - /=http://localhost:8000/
+    - /kong/=http://localhost:8443/kong/
+    - /analytics/=http://localhost:4000/analytics/
+  dependencies:
+    - nodejs
+    - npm
+    - curl
+    - wget
+    - bash
+  # setupscript 每次进入到app container后都会执行的配置脚本
+  # - 可以为脚本的路径地址
+  # - 如果构建命令简单，也可以直接写 sh 的命令
+  # setupscript: export GOPROXY=https://goproxy.cn
+  # setupscript: ./setupscript.sh
+  setupscript: |
+    export npm_config_registry=https://registry.npmmirror.com
