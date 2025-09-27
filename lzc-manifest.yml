@@ -67,11 +67,11 @@ services:
       - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
       - DASHBOARD_USERNAME=supabase
       - DASHBOARD_PASSWORD=this_password_is_insecure_and_should_be_updated
-    entrypoint: bash -c 'eval "echo \"$$(cat ~/config/kong.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/kong.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
     depends_on:
       - analytics
     binds:
-      - /lzcapp/pkg/content/volumes/api:/home/kong/config
+      - /lzcapp/pkg/content/api:/home/kong
   auth:
     image: registry.lazycat.cloud/u95011260/supabase/gotrue:97e34b8931c30ba1
     environment:
@@ -234,7 +234,7 @@ services:
     depends_on:
       - analytics
     binds:
-      - /lzcapp/pkg/content/volumes/functions:/home/deno/functions
+      - /lzcapp/pkg/content/functions:/home/deno/functions
   analytics:
     image: registry.lazycat.cloud/u95011260/supabase/logflare:a227756f2691d80d
     environment:
@@ -274,14 +274,8 @@ services:
       - JWT_EXP=3600
     command: postgres -c log_min_messages=fatal
     binds:
-      - /lzcapp/pkg/content/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql
-      - /lzcapp/pkg/content/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql
-      - /lzcapp/pkg/content/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql
-      - /lzcapp/pkg/content/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql
+      - /lzcapp/pkg/content/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - /lzcapp/var/supabase-data:/var/lib/postgresql/data
-      - /lzcapp/pkg/content/volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql
-      - /lzcapp/pkg/content/volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql
-      - /lzcapp/pkg/content/volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql
       - /lzcapp/var/postgresql-custom:/etc/postgresql-custom
     health_check:
       test:
@@ -297,8 +291,7 @@ services:
       - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
     command: --config /etc/vector/vector.toml
     binds:
-      - /lzcapp/pkg/content/volumes/logs:/etc/vector
-      - /lzcapp/var/run/docker.sock:/var/run/docker.sock
+      - /lzcapp/pkg/content/logs:/etc/vector
     health_check:
       test:
         - CMD
@@ -333,7 +326,7 @@ services:
       - db
       - analytics
     binds:
-      - /lzcapp/pkg/content/volumes/pooler:/etc/pooler/config
+      - /lzcapp/pkg/content/pooler:/etc/pooler/config
     health_check:
       test:
         - CMD

@@ -18,6 +18,25 @@ pkgout: ./
 # icon: Supabase 图标
 icon: ./icon.png
 
+# compose_override: 为服务添加额外的挂载配置
+compose_override:
+  services:
+    kong:
+      volumes:
+        - ./volumes/api:/lzcapp/pkg/content/api:ro
+    vector:
+      volumes:
+        - ./volumes/logs:/lzcapp/pkg/content/logs:ro
+    functions:
+      volumes:
+        - ./volumes/functions:/lzcapp/pkg/content/functions:ro
+    db:
+      volumes:
+        - ./volumes/db:/lzcapp/pkg/content/db:ro
+    supavisor:
+      volumes:
+        - ./volumes/pooler:/lzcapp/pkg/content/pooler:ro
+
 # 环境变量配置说明
 # 用户在安装时需要配置以下环境变量：
 #
