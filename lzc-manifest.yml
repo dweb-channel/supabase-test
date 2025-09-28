@@ -1,4 +1,4 @@
-lzc-sdk-version: "1.25.4"
+lzc-sdk-version: "0.1"
 name: supabase
 package: cloud.lazy.app.supabase
 version: 1.25.4
@@ -31,18 +31,18 @@ services:
   studio:
     image: registry.lazycat.cloud/u95011260/supabase/studio:dbf8b30956d293f6
     environment:
-      - STUDIO_PG_META_URL=http://localhost:8080
+      - STUDIO_PG_META_URL=http://meta:8080
       - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
       - DEFAULT_ORGANIZATION_NAME=Default Organization
       - DEFAULT_PROJECT_NAME=Default Project
       - OPENAI_API_KEY=
-      - SUPABASE_URL=http://localhost:8000
+      - SUPABASE_URL=http://kong:8000
       - SUPABASE_PUBLIC_URL=http://localhost:8000
       - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
       - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
       - AUTH_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
       - LOGFLARE_PRIVATE_ACCESS_TOKEN=your-super-secret-and-long-logflare-key-private
-      - LOGFLARE_URL=http://localhost:4000
+      - LOGFLARE_URL=http://analytics:4000
       - NEXT_PUBLIC_ENABLE_LOGS=true
       - NEXT_ANALYTICS_BACKEND_PROVIDER=postgres
     depends_on:
@@ -52,7 +52,7 @@ services:
         - CMD
         - node
         - -e
-        - fetch('http://localhost:3000/api/platform/profile').then((r) => {if
+        - fetch('http://studio:3000/api/platform/profile').then((r) => {if
           (r.status !== 200) throw new Error(r.status)})
   kong:
     image: registry.lazycat.cloud/u95011260/library/kong:783ea9c34b9b0f5c
@@ -80,7 +80,7 @@ services:
       - GOTRUE_API_PORT=9999
       - API_EXTERNAL_URL=http://localhost:8000
       - GOTRUE_DB_DRIVER=postgres
-      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:HGaQSGm95b7adrmrmsN7k3>Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - GOTRUE_SITE_URL=http://localhost:3000
       - GOTRUE_URI_ALLOW_LIST=
       - GOTRUE_DISABLE_SIGNUP=false
@@ -129,11 +129,16 @@ services:
     depends_on:
       - db
       - analytics
+    health_check:
+      disable: true
+      test:
+       - CMD
+       - health
   realtime:
     image: registry.lazycat.cloud/u95011260/supabase/realtime:0546ae3e8e4d3ae3
     environment:
       - PORT=4000
-      - DB_HOST=localhost
+      - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=supabase_admin
       - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
@@ -160,18 +165,17 @@ services:
         - -o
         - /dev/null
         - -H
-        - "Authorization: Bearer
-          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwK\
-          ICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKI\
-          CAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8\
-          Bu4GE"
+        - "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E"
         - http://localhost:4000/api/tenants/realtime-dev/health
+      timeout: 5s
+      interval: 5s
+      retries: 3
   storage:
     image: registry.lazycat.cloud/u95011260/supabase/storage-api:5bf488e768d809c4
     environment:
       - ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
       - SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
-      - POSTGREST_URL=http://localhost:3000
+      - POSTGREST_URL=http://rest:3000
       - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
       - DATABASE_URL=postgres://supabase_storage_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - FILE_SIZE_LIMIT=52428800
@@ -181,7 +185,7 @@ services:
       - REGION=stub
       - GLOBAL_S3_BUCKET=stub
       - ENABLE_IMAGE_TRANSFORMATION=true
-      - IMGPROXY_URL=http://localhost:5001
+      - IMGPROXY_URL=http://imgproxy:5001
     depends_on:
       - db
       - rest
@@ -195,7 +199,7 @@ services:
         - --no-verbose
         - --tries=1
         - --spider
-        - http://localhost:5000/status
+        - http://storage:5000/status
   imgproxy:
     image: registry.lazycat.cloud/u95011260/darthsim/imgproxy:0cd0d8b94d90b5ab
     environment:
@@ -214,7 +218,7 @@ services:
     image: registry.lazycat.cloud/u95011260/supabase/postgres-meta:bc9666516cca28bf
     environment:
       - PG_META_PORT=8080
-      - PG_META_DB_HOST=localhost
+      - PG_META_DB_HOST=db
       - PG_META_DB_PORT=5432
       - PG_META_DB_NAME=postgres
       - PG_META_DB_USER=supabase_admin
@@ -230,16 +234,24 @@ services:
       - /lzcapp/pkg/content/functions:/home/deno/functions
     environment:
       - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
-      - SUPABASE_URL=http://localhost:8000
+      - SUPABASE_URL=http://kong:8000
       - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
       - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
       - SUPABASE_DB_URL=postgresql://postgres:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - VERIFY_JWT=false
     command: start --main-service /home/deno/functions/main
+    health_check:
+      disable: true
+      test:
+       - CMD
+       - health
   analytics:
     image: registry.lazycat.cloud/u95011260/supabase/logflare:a227756f2691d80d
+    binds:
+      - /lzcapp/var/analytics:/tmp
     environment:
-      - LOGFLARE_NODE_HOST=localhost
+      - LOGFLARE_NODE_HOST=127.0.0.1
+      - TMPDIR=/tmp
       - DB_USERNAME=supabase_admin
       - DB_DATABASE=_supabase
       - DB_HOSTNAME=db
@@ -247,13 +259,20 @@ services:
       - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
       - DB_SCHEMA=_analytics
       - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
-      - LOGFLARE_PRIVATE_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
+      - LOGFLARE_PRIVATE_ACCESS_TOKEN=your-super-secret-and-long-logflare-key-private
       - LOGFLARE_SINGLE_TENANT=true
       - LOGFLARE_SUPABASE_MODE=true
       - LOGFLARE_MIN_CLUSTER_SIZE=1
       - POSTGRES_BACKEND_URL=postgresql://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/_supabase
       - POSTGRES_BACKEND_SCHEMA=_analytics
       - LOGFLARE_FEATURE_FLAG_OVERRIDE=multibackend=true
+      - LOGFLARE_GOOGLE_CLOUD_PROJECT_ID=
+      - GOOGLE_APPLICATION_CREDENTIALS=
+      - LOGFLARE_GOOGLE_CLOUD_PROJECT_NUMBER=
+      - DATADOG_API_KEY=
+      - LOGFLARE_BIGQUERY_BACKEND_ENABLED=false
+      - LOGFLARE_DATADOG_BACKEND_ENABLED=false
+      - LOGFLARE_POSTGRES_BACKEND_ENABLED=true
     depends_on:
       - db
     health_check:
@@ -261,10 +280,9 @@ services:
         - CMD
         - curl
         - http://localhost:4000/health
-      interval: 15s
       timeout: 5s
-      retries: 20
-      start_period: 120s
+      interval: 5s
+      retries: 10
   db:
     image: registry.lazycat.cloud/u95011260/supabase/postgres:3529b4327368f298
     binds:
@@ -286,7 +304,7 @@ services:
       # Use named volume to persist pgsodium decryption key between restarts
       - /lzcapp/var/db-config:/etc/postgresql-custom
     environment:
-      - POSTGRES_HOST=localhost
+      - POSTGRES_HOST=/var/run/postgresql
       - PGPORT=5432
       - POSTGRES_PORT=5432
       - PGPASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
@@ -295,7 +313,8 @@ services:
       - POSTGRES_DB=postgres
       - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
       - JWT_EXP=3600
-    command: postgres -c log_min_messages=fatal
+      - POSTGRES_LISTEN_ADDRESSES=*
+    command: postgres -c log_min_messages=fatal -c listen_addresses='*' -c port=5432 -c unix_socket_directories='/var/run/postgresql' -c shared_preload_libraries='pg_net,pg_stat_statements' -c wal_level=logical
     health_check:
       test:
         - CMD
@@ -304,9 +323,9 @@ services:
         - postgres
         - -h
         - localhost
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 10
       start_period: 60s
   vector:
     image: registry.lazycat.cloud/u95011260/timberio/vector:68c5884c3e523f6f
@@ -315,14 +334,6 @@ services:
     environment:
       - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
     command: --config /etc/vector/vector.yml
-    health_check:
-      test:
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://localhost:9001/health
   supavisor:
     image: registry.lazycat.cloud/u95011260/supabase/supavisor:24de9bc097db8336
     depends_on:
@@ -350,12 +361,3 @@ services:
       - DB_POOL_SIZE=5
     command: /bin/sh -c /app/bin/migrate && /app/bin/supavisor eval "$$(cat
       /etc/pooler/config/pooler.exs)" && /app/bin/server
-    health_check:
-      test:
-        - CMD
-        - curl
-        - -sSfL
-        - --head
-        - -o
-        - /dev/null
-        - http://localhost:4000/api/health
