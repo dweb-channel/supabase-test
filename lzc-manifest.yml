@@ -1,4 +1,4 @@
-lzc-sdk-version: "0.1"
+lzc-sdk-version: "1.25.4"
 name: supabase
 package: cloud.lazy.app.supabase
 version: 1.25.4
@@ -11,7 +11,7 @@ homepage:
 author: supabase
 application:
   subdomain: supabase
-  background_task: false
+  background_task: true
   multi_instance: false
   gpu_accel: false
   kvm_accel: false
@@ -56,9 +56,13 @@ services:
           (r.status !== 200) throw new Error(r.status)})
   kong:
     image: registry.lazycat.cloud/u95011260/library/kong:783ea9c34b9b0f5c
+    depends_on:
+      - analytics
+    binds:
+      - /lzcapp/pkg/content/api:/etc/kong
     environment:
       - KONG_DATABASE=off
-      - KONG_DECLARATIVE_CONFIG=/home/kong/kong.yml
+      - KONG_DECLARATIVE_CONFIG=/tmp/kong.yml
       - KONG_DNS_ORDER=LAST,A,CNAME
       - KONG_PLUGINS=request-transformer,cors,key-auth,acl,basic-auth
       - KONG_NGINX_PROXY_PROXY_BUFFER_SIZE=160k
@@ -67,11 +71,8 @@ services:
       - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
       - DASHBOARD_USERNAME=supabase
       - DASHBOARD_PASSWORD=this_password_is_insecure_and_should_be_updated
-    entrypoint: bash -c 'eval "echo \"$$(cat ~/kong.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
-    depends_on:
-      - analytics
-    binds:
-      - /lzcapp/pkg/content/api:/home/kong
+    entrypoint: bash -c 'eval "echo \"$$(cat /etc/kong/kong.yml)\"" > /tmp/kong.yml && /docker-entrypoint.sh kong docker-start'
+
   auth:
     image: registry.lazycat.cloud/u95011260/supabase/gotrue:97e34b8931c30ba1
     environment:
@@ -79,7 +80,7 @@ services:
       - GOTRUE_API_PORT=9999
       - API_EXTERNAL_URL=http://localhost:8000
       - GOTRUE_DB_DRIVER=postgres
-      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:HGaQSGm95b7adrmrmsN7k3>Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - GOTRUE_SITE_URL=http://localhost:3000
       - GOTRUE_URI_ALLOW_LIST=
       - GOTRUE_DISABLE_SIGNUP=false
@@ -117,7 +118,7 @@ services:
   rest:
     image: registry.lazycat.cloud/u95011260/postgrest/postgrest:56754e2f0bb91158
     environment:
-      - PGRST_DB_URI=postgres://authenticator:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - PGRST_DB_URI=postgres://authenticator:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - PGRST_DB_SCHEMAS=public,storage,graphql_public
       - PGRST_DB_ANON_ROLE=anon
       - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
@@ -172,7 +173,7 @@ services:
       - SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
       - POSTGREST_URL=http://localhost:3000
       - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
-      - DATABASE_URL=postgres://supabase_storage_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - DATABASE_URL=postgres://supabase_storage_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - FILE_SIZE_LIMIT=52428800
       - STORAGE_BACKEND=file
       - FILE_STORAGE_BACKEND_PATH=/var/lib/storage
@@ -223,25 +224,25 @@ services:
       - analytics
   functions:
     image: registry.lazycat.cloud/u95011260/supabase/edge-runtime:d511375729d5f8f8
+    depends_on:
+      - analytics
+    binds:
+      - /lzcapp/pkg/content/functions:/home/deno/functions
     environment:
       - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
       - SUPABASE_URL=http://localhost:8000
       - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
       - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q
-      - SUPABASE_DB_URL=postgresql://postgres:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/postgres
+      - SUPABASE_DB_URL=postgresql://postgres:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - VERIFY_JWT=false
     command: start --main-service /home/deno/functions/main
-    depends_on:
-      - analytics
-    binds:
-      - /lzcapp/pkg/content/functions:/home/deno/functions
   analytics:
     image: registry.lazycat.cloud/u95011260/supabase/logflare:a227756f2691d80d
     environment:
       - LOGFLARE_NODE_HOST=localhost
       - DB_USERNAME=supabase_admin
       - DB_DATABASE=_supabase
-      - DB_HOSTNAME=localhost
+      - DB_HOSTNAME=db
       - DB_PORT=5432
       - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
       - DB_SCHEMA=_analytics
@@ -250,7 +251,7 @@ services:
       - LOGFLARE_SINGLE_TENANT=true
       - LOGFLARE_SUPABASE_MODE=true
       - LOGFLARE_MIN_CLUSTER_SIZE=1
-      - POSTGRES_BACKEND_URL=postgresql://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/_supabase
+      - POSTGRES_BACKEND_URL=postgresql://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/_supabase
       - POSTGRES_BACKEND_SCHEMA=_analytics
       - LOGFLARE_FEATURE_FLAG_OVERRIDE=multibackend=true
     depends_on:
@@ -260,10 +261,32 @@ services:
         - CMD
         - curl
         - http://localhost:4000/health
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
   db:
     image: registry.lazycat.cloud/u95011260/supabase/postgres:3529b4327368f298
+    binds:
+      - /lzcapp/pkg/content/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql
+      # Must be superuser to create event trigger
+      - /lzcapp/pkg/content/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql
+      # Must be superuser to alter reserved role
+      - /lzcapp/pkg/content/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql
+      # Initialize the database settings with JWT_SECRET and JWT_EXP
+      - /lzcapp/pkg/content/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql
+      # PGDATA directory is persisted between restarts
+      - /lzcapp/pkg/content/db/data:/var/lib/postgresql/data
+      # Changes required for internal supabase data such as _analytics
+      - /lzcapp/pkg/content/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql
+      # Changes required for Analytics support
+      - /lzcapp/pkg/content/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql
+      # Changes required for Pooler support
+      - /lzcapp/pkg/content/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql
+      # Use named volume to persist pgsodium decryption key between restarts
+      - /lzcapp/var/db-config:/etc/postgresql-custom
     environment:
-      - POSTGRES_HOST=0.0.0.0
+      - POSTGRES_HOST=localhost
       - PGPORT=5432
       - POSTGRES_PORT=5432
       - PGPASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
@@ -273,10 +296,6 @@ services:
       - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
       - JWT_EXP=3600
     command: postgres -c log_min_messages=fatal
-    binds:
-      - /lzcapp/pkg/content/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-      - /lzcapp/var/supabase-data:/var/lib/postgresql/data
-      - /lzcapp/var/postgresql-custom:/etc/postgresql-custom
     health_check:
       test:
         - CMD
@@ -285,13 +304,17 @@ services:
         - postgres
         - -h
         - localhost
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
   vector:
     image: registry.lazycat.cloud/u95011260/timberio/vector:68c5884c3e523f6f
+    binds:
+      - /lzcapp/pkg/content/logs/vector.yml:/etc/vector/vector.yml
     environment:
       - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
-    command: --config /etc/vector/vector.toml
-    binds:
-      - /lzcapp/pkg/content/logs:/etc/vector
+    command: --config /etc/vector/vector.yml
     health_check:
       test:
         - CMD
@@ -302,12 +325,17 @@ services:
         - http://localhost:9001/health
   supavisor:
     image: registry.lazycat.cloud/u95011260/supabase/supavisor:24de9bc097db8336
+    depends_on:
+      - db
+      - analytics
+    binds:
+      - /lzcapp/pkg/content/pooler/pooler.exs:/etc/pooler/config/pooler.exs
     environment:
       - PORT=4000
       - POSTGRES_PORT=5432
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
-      - DATABASE_URL=ecto://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@localhost:5432/_supabase
+      - DATABASE_URL=ecto://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/_supabase
       - CLUSTER_POSTGRES=true
       - SECRET_KEY_BASE=UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
       - VAULT_ENC_KEY=ZDQzNjgzNzljMTFiNmMyMDk5NDBlYTBh
@@ -322,11 +350,6 @@ services:
       - DB_POOL_SIZE=5
     command: /bin/sh -c /app/bin/migrate && /app/bin/supavisor eval "$$(cat
       /etc/pooler/config/pooler.exs)" && /app/bin/server
-    depends_on:
-      - db
-      - analytics
-    binds:
-      - /lzcapp/pkg/content/pooler:/etc/pooler/config
     health_check:
       test:
         - CMD
