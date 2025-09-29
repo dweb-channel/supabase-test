@@ -131,16 +131,6 @@ services:
     depends_on:
       - db
       - analytics
-    health_check:
-      test:
-        - CMD
-        - sh
-        - -c
-        - "curl -s http://localhost:3000/ | grep -q 'openapi' || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
   realtime:
     image: registry.lazycat.cloud/u95011260/supabase/realtime:0546ae3e8e4d3ae3
     environment:
@@ -371,7 +361,7 @@ services:
       - db
       - analytics
     binds:
-      - /lzcapp/pkg/content/pooler/pooler.exs:/etc/pooler/config/pooler.exs
+      - /lzcapp/pkg/content/pooler/pooler.exs:/etc/pooler/pooler.exs
     environment:
       - PORT=4000
       - POSTGRES_PORT=5432
@@ -390,5 +380,5 @@ services:
       - POOLER_MAX_CLIENT_CONN=100
       - POOLER_POOL_MODE=transaction
       - DB_POOL_SIZE=5
-    command: /bin/sh -c /app/bin/migrate && /app/bin/supavisor eval "$$(cat
-      /etc/pooler/config/pooler.exs)" && /app/bin/server
+      - POSTGRES_HOST=db
+    command: /bin/sh -c "/app/bin/migrate && /app/bin/supavisor eval \"$$(cat /etc/pooler/pooler.exs)\" && /app/bin/server"

@@ -1,5 +1,4 @@
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
+import * as jose from "jsr:@panva/jose";
 
 // EdgeRuntime is globally available in Supabase Edge Runtime
 declare const EdgeRuntime: any;
@@ -33,7 +32,7 @@ async function verifyJWT(jwt: string): Promise<boolean> {
   return true;
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method !== "OPTIONS" && VERIFY_JWT) {
     try {
       const token = getAuthToken(req);
@@ -47,7 +46,7 @@ serve(async (req: Request) => {
       }
     } catch (e) {
       console.error(e);
-      return new Response(JSON.stringify({ msg: e.toString() }), {
+      return new Response(JSON.stringify({ msg: String(e) }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
@@ -88,7 +87,7 @@ serve(async (req: Request) => {
     });
     return await worker.fetch(req);
   } catch (e) {
-    const error = { msg: e.toString() };
+    const error = { msg: String(e) };
     return new Response(JSON.stringify(error), {
       status: 500,
       headers: { "Content-Type": "application/json" },
