@@ -12,11 +12,12 @@ author: supabase
 application:
   subdomain: supabase
   background_task: true
-  multi_instance: false
+  public_path:
+    - /
   routes:
-    - /=http://supabase.cloud.lazy.app.supabase.lzcapp:8000
-    - /studio=http://supabase.cloud.lazy.app.supabase.lzcapp:3000
-    - /analytics=http://supabase.cloud.lazy.app.supabase.lzcapp:4000
+    - /=http://localhost:8000/
+    - /kong/=http://localhost:8443/kong/
+    - /analytics/=http://localhost:4000/analytics/
   ingress:
     - protocol: tcp
       port: 5432
