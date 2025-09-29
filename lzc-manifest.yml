@@ -13,13 +13,10 @@ application:
   subdomain: supabase
   background_task: true
   multi_instance: false
-  gpu_accel: false
-  kvm_accel: false
-  usb_accel: false
   routes:
-    - /=http://localhost:8000/
-    - /kong/=http://localhost:8443/kong/
-    - /analytics/=http://localhost:4000/analytics/
+    - /=http://supabase.cloud.lazy.app.supabase.lzcapp:8000
+    - /studio=http://supabase.cloud.lazy.app.supabase.lzcapp:3000
+    - /analytics=http://supabase.cloud.lazy.app.supabase.lzcapp:4000
   ingress:
     - protocol: tcp
       port: 5432
@@ -237,16 +234,6 @@ services:
       - SUPABASE_DB_URL=postgresql://postgres:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
       - VERIFY_JWT=false
     command: start --main-service /home/deno/functions/main
-    health_check:
-      test:
-        - CMD
-        - sh
-        - -c
-        - "ps aux | grep -v grep | grep -q 'deno.*main' || exit 1"
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 60s
   analytics:
     image: registry.lazycat.cloud/u95011260/supabase/logflare:a227756f2691d80d
     binds:
@@ -268,13 +255,16 @@ services:
       - POSTGRES_BACKEND_URL=postgresql://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/_supabase
       - POSTGRES_BACKEND_SCHEMA=_analytics
       - LOGFLARE_FEATURE_FLAG_OVERRIDE=multibackend=true
-      - LOGFLARE_GOOGLE_CLOUD_PROJECT_ID=
-      - GOOGLE_APPLICATION_CREDENTIALS=
-      - LOGFLARE_GOOGLE_CLOUD_PROJECT_NUMBER=
+      - LOGFLARE_GOOGLE_CLOUD_PROJECT_ID=""
+      - GOOGLE_APPLICATION_CREDENTIALS=""
+      - LOGFLARE_GOOGLE_CLOUD_PROJECT_NUMBER=""
       - DATADOG_API_KEY=
       - LOGFLARE_BIGQUERY_BACKEND_ENABLED=false
       - LOGFLARE_DATADOG_BACKEND_ENABLED=false
       - LOGFLARE_POSTGRES_BACKEND_ENABLED=true
+      - LOGFLARE_DISABLE_BIGQUERY=true
+      - LOGFLARE_DISABLE_GOOGLE_CLOUD=true
+      - LOGFLARE_BACKEND_TYPE=postgres
     depends_on:
       - db
     health_check:

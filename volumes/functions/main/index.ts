@@ -3,10 +3,13 @@ import * as jose from "jsr:@panva/jose";
 // EdgeRuntime is globally available in Supabase Edge Runtime
 declare const EdgeRuntime: any;
 
-console.log("main function started");
-
 const JWT_SECRET = Deno.env.get("JWT_SECRET");
 const VERIFY_JWT = Deno.env.get("VERIFY_JWT") === "true";
+
+console.log("main function started");
+console.log("JWT_SECRET configured:", !!JWT_SECRET);
+console.log("VERIFY_JWT enabled:", VERIFY_JWT);
+console.log("Edge Functions server is listening for requests...");
 
 function getAuthToken(req: Request) {
   const authHeader = req.headers.get("authorization");
