@@ -125,15 +125,22 @@ services:
       - PGRST_DB_USE_LEGACY_GUCS=false
       - PGRST_APP_SETTINGS_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
       - PGRST_APP_SETTINGS_JWT_EXP=3600
+      - PGRST_SERVER_PORT=3000
+      - PGRST_DB_CHANNEL_ENABLED=false
     command: postgrest
     depends_on:
       - db
       - analytics
     health_check:
-      disable: true
       test:
-       - CMD
-       - health
+        - CMD
+        - sh
+        - -c
+        - "curl -s http://localhost:3000/ | grep -q 'openapi' || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   realtime:
     image: registry.lazycat.cloud/u95011260/supabase/realtime:0546ae3e8e4d3ae3
     environment:
@@ -241,10 +248,15 @@ services:
       - VERIFY_JWT=false
     command: start --main-service /home/deno/functions/main
     health_check:
-      disable: true
       test:
-       - CMD
-       - health
+        - CMD
+        - sh
+        - -c
+        - "ps aux | grep -v grep | grep -q 'deno.*main' || exit 1"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
   analytics:
     image: registry.lazycat.cloud/u95011260/supabase/logflare:a227756f2691d80d
     binds:
@@ -333,7 +345,26 @@ services:
       - /lzcapp/pkg/content/logs/vector.yml:/etc/vector/vector.yml
     environment:
       - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
+    depends_on:
+      - analytics
+      - rest
+      - realtime
+      - auth
+      - storage
+      - kong
     command: --config /etc/vector/vector.yml
+    health_check:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://vector:9001/health
+      timeout: 5s
+      interval: 10s
+      retries: 5
+      start_period: 30s
   supavisor:
     image: registry.lazycat.cloud/u95011260/supabase/supavisor:24de9bc097db8336
     depends_on:

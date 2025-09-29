@@ -27,6 +27,11 @@ compose_override:
     vector:
       volumes:
         - ./volumes/logs:/lzcapp/pkg/content/logs:ro
+        - bind:
+            create_host_path: true
+          source: /lzcsys/run/lzc-docker
+          target: /var/run
+          type: bind
     functions:
       volumes:
         - ./volumes/functions:/lzcapp/pkg/content/functions:ro
