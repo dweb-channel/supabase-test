@@ -37,10 +37,13 @@ check_secrets() {
 
 # 显示访问信息
 show_access_info() {
+    # 尝试获取实际域名
+    DOMAIN="${LAZYCAT_APP_DOMAIN:-supabase.waterbang.heiyu.space}"
+    
     echo ""
     echo "${BLUE}📍 访问地址:${NC}"
     echo "   ${GREEN}Studio 管理界面:${NC}"
-    echo "      https://supabase.waterbang.heiyu.space/"
+    echo "      https://${DOMAIN}/"
     echo ""
     echo "   ${YELLOW}💡 提示:${NC} Analytics 数据可在 Studio 界面中查看"
     echo ""
@@ -48,12 +51,15 @@ show_access_info() {
 
 # 显示 API 端点
 show_api_endpoints() {
+    # 尝试获取实际域名
+    DOMAIN="${LAZYCAT_APP_DOMAIN:-supabase.waterbang.heiyu.space}"
+    
     echo "${BLUE}🔑 API 端点 (通过 Kong 网关):${NC}"
-    echo "   - Auth:     https://supabase.waterbang.heiyu.space/auth/v1/"
-    echo "   - REST:     https://supabase.waterbang.heiyu.space/rest/v1/"
-    echo "   - Storage:  https://supabase.waterbang.heiyu.space/storage/v1/"
-    echo "   - Realtime: wss://supabase.waterbang.heiyu.space/realtime/v1/"
-    echo "   - GraphQL:  https://supabase.waterbang.heiyu.space/graphql/v1/"
+    echo "   - Auth:     https://${DOMAIN}/auth/v1/"
+    echo "   - REST:     https://${DOMAIN}/rest/v1/"
+    echo "   - Storage:  https://${DOMAIN}/storage/v1/"
+    echo "   - Realtime: wss://${DOMAIN}/realtime/v1/"
+    echo "   - GraphQL:  https://${DOMAIN}/graphql/v1/"
     echo ""
 }
 

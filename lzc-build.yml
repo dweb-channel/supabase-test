@@ -98,7 +98,7 @@ devshell:
   public_path:
     - /
   routes:
-    - /=http://studio:3000/
+    - /=http://kong:8000/
   dependencies:
     - nodejs
     - npm

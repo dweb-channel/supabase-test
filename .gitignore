@@ -4,6 +4,7 @@
 /volumes/db/data
 /volumes/db/docker-entrypoint-initdb.d
 /button
+/test
 
 # 敏感信息 - 密钥文件
 supabase-secrets.txt

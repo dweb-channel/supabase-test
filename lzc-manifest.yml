@@ -13,7 +13,7 @@ application:
   subdomain: supabase
   background_task: true
   routes:
-    - /=http://studio:3000/
+    - /=http://kong:8000/
   ingress:
     - protocol: tcp
       port: 5432
@@ -25,13 +25,16 @@ services:
   studio:
     image: registry.lazycat.cloud/u95011260/supabase/studio:dbf8b30956d293f6
     environment:
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+      - NEXT_PUBLIC_HOSTNAME=0.0.0.0
       - STUDIO_PG_META_URL=http://meta:8080
       - POSTGRES_PASSWORD={{ .U.POSTGRES_PASSWORD }}
       - DEFAULT_ORGANIZATION_NAME=Default Organization
       - DEFAULT_PROJECT_NAME=Default Project
       - OPENAI_API_KEY=
       - SUPABASE_URL=http://kong:8000
-      - SUPABASE_PUBLIC_URL=http://localhost:8000
+      - SUPABASE_PUBLIC_URL=https://${LAZYCAT_APP_DOMAIN}
       - SUPABASE_ANON_KEY={{ .U.ANON_KEY }}
       - SUPABASE_SERVICE_KEY={{ .U.SERVICE_ROLE_KEY }}
       - AUTH_JWT_SECRET={{ .U.JWT_SECRET }}
@@ -53,11 +56,17 @@ services:
     image: registry.lazycat.cloud/u95011260/library/kong:783ea9c34b9b0f5c
     depends_on:
       - analytics
+      - studio
+      - auth
+      - rest
+      - storage
+      - realtime
+      - meta
     binds:
-      - /lzcapp/pkg/content/api:/etc/kong
+      - /lzcapp/pkg/content/api/kong.yml:/home/kong/temp.yml
     environment:
       - KONG_DATABASE=off
-      - KONG_DECLARATIVE_CONFIG=/tmp/kong.yml
+      - KONG_DECLARATIVE_CONFIG=/home/kong/kong.yml
       - KONG_DNS_ORDER=LAST,A,CNAME
       - KONG_PLUGINS=request-transformer,cors,key-auth,acl,basic-auth
       - KONG_NGINX_PROXY_PROXY_BUFFER_SIZE=160k
@@ -66,17 +75,17 @@ services:
       - SUPABASE_SERVICE_KEY={{ .U.SERVICE_ROLE_KEY }}
       - DASHBOARD_USERNAME=supabase
       - DASHBOARD_PASSWORD=this_password_is_insecure_and_should_be_updated
-    entrypoint: bash -c 'eval "echo \"$$(cat /etc/kong/kong.yml)\"" > /tmp/kong.yml && /docker-entrypoint.sh kong docker-start'
+    entrypoint: bash -c 'sleep 10 && eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
 
   auth:
     image: registry.lazycat.cloud/u95011260/supabase/gotrue:97e34b8931c30ba1
     environment:
       - GOTRUE_API_HOST=0.0.0.0
       - GOTRUE_API_PORT=9999
-      - API_EXTERNAL_URL=http://localhost:8000
+      - API_EXTERNAL_URL=https://${LAZYCAT_APP_DOMAIN}
       - GOTRUE_DB_DRIVER=postgres
       - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:{{ .U.POSTGRES_PASSWORD }}@db:5432/postgres
-      - GOTRUE_SITE_URL=http://localhost:3000
+      - GOTRUE_SITE_URL=https://${LAZYCAT_APP_DOMAIN}
       - GOTRUE_URI_ALLOW_LIST=
       - GOTRUE_DISABLE_SIGNUP=false
       - GOTRUE_JWT_ADMIN_ROLES=service_role
