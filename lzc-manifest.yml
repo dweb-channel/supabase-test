@@ -12,12 +12,10 @@ author: supabase
 application:
   subdomain: supabase
   background_task: true
-  public_path:
-    - /
   routes:
-    - /=http://localhost:8000/
-    - /kong/=http://localhost:8443/kong/
-    - /analytics/=http://localhost:4000/analytics/
+    - /=http://studio:3000/
+    - /kong/=http://kong:8000/kong/
+    - /analytics/=http://analytics:4000/analytics/
   ingress:
     - protocol: tcp
       port: 5432
