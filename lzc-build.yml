@@ -99,8 +99,7 @@ devshell:
     - /
   routes:
     - /=http://studio:3000/
-    - /kong/=http://kong:8000
-    - /analytics/=http://analytics:4000
+    - /analytics/v1/=http://analytics:4000
   dependencies:
     - nodejs
     - npm
