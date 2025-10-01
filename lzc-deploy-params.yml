@@ -1,0 +1,75 @@
+# Supabase 部署参数配置
+# 用户在安装时可以配置这些参数
+
+params:
+  # 数据库密码
+  - id: POSTGRES_PASSWORD
+    type: string
+    name: 数据库密码
+    description: PostgreSQL 数据库的主密码，用于所有内部数据库连接
+    optional: false
+    default_value: "HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI="
+    hidden: false
+
+  # JWT 密钥
+  - id: JWT_SECRET
+    type: string
+    name: JWT 签名密钥
+    description: 用于签名和验证 JWT tokens 的密钥
+    optional: false
+    default_value: "WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx"
+    hidden: true
+
+  # 匿名访问密钥
+  - id: ANON_KEY
+    type: string
+    name: 匿名访问密钥
+    description: 客户端公开使用的 API 密钥，具有匿名角色权限
+    optional: false
+    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E"
+    hidden: false
+
+  # 服务角色密钥
+  - id: SERVICE_ROLE_KEY
+    type: string
+    name: 服务角色密钥
+    description: 服务端使用的 API 密钥，具有完全访问权限，请妥善保管
+    optional: false
+    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTg5MDI0MDAsImV4cCI6MTkxNjY2ODgwMH0.r1dYUfYVb1-TDOsbkLVdzXdrcfhiOWJlEq_nmQGcZTE"
+    hidden: true
+
+  # Logflare 公钥
+  - id: LOGFLARE_PUBLIC_ACCESS_TOKEN
+    type: string
+    name: Logflare 公钥
+    description: Analytics 服务的公共访问令牌
+    optional: false
+    default_value: "c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k="
+    hidden: true
+
+  # Logflare 私钥
+  - id: LOGFLARE_PRIVATE_ACCESS_TOKEN
+    type: string
+    name: Logflare 私钥
+    description: Analytics 服务的私有访问令牌
+    optional: false
+    default_value: "your-super-secret-and-long-logflare-key-private"
+    hidden: true
+
+  # 基础密钥
+  - id: SECRET_KEY_BASE
+    type: string
+    name: 基础密钥
+    description: Realtime 和 Pooler 服务的基础加密密钥
+    optional: false
+    default_value: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
+    hidden: true
+
+  # Vault 加密密钥
+  - id: VAULT_ENC_KEY
+    type: string
+    name: Vault 加密密钥
+    description: Pooler 服务的 Vault 加密密钥
+    optional: false
+    default_value: "ZDQzNjgzNzljMTFiNmMyMDk5NDBlYTBh"
+    hidden: true

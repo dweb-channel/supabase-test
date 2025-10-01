@@ -28,17 +28,16 @@ services:
     image: registry.lazycat.cloud/u95011260/supabase/studio:dbf8b30956d293f6
     environment:
       - STUDIO_PG_META_URL=http://meta:8080
-      - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - POSTGRES_PASSWORD={{ .U.POSTGRES_PASSWORD }}
       - DEFAULT_ORGANIZATION_NAME=Default Organization
       - DEFAULT_PROJECT_NAME=Default Project
       - OPENAI_API_KEY=
       - SUPABASE_URL=http://kong:8000
-      - SUPABASE_PUBLIC_URL=https://supabase.waterbang.heiyu.space
-      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
-      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTg5MDI0MDAsImV4cCI6MTkxNjY2ODgwMH0.r1dYUfYVb1-TDOsbkLVdzXdrcfhiOWJlEq_nmQGcZTE
-      - AUTH_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
-      - API_URL=http://kong:8000
-      - LOGFLARE_PRIVATE_ACCESS_TOKEN=your-super-secret-and-long-logflare-key-private
+      - SUPABASE_PUBLIC_URL=http://localhost:8000
+      - SUPABASE_ANON_KEY={{ .U.ANON_KEY }}
+      - SUPABASE_SERVICE_KEY={{ .U.SERVICE_ROLE_KEY }}
+      - AUTH_JWT_SECRET={{ .U.JWT_SECRET }}
+      - LOGFLARE_PRIVATE_ACCESS_TOKEN={{ .U.LOGFLARE_PRIVATE_ACCESS_TOKEN }}
       - LOGFLARE_URL=http://analytics:4000
       - NEXT_PUBLIC_ENABLE_LOGS=true
       - NEXT_ANALYTICS_BACKEND_PROVIDER=postgres
@@ -65,8 +64,8 @@ services:
       - KONG_PLUGINS=request-transformer,cors,key-auth,acl,basic-auth
       - KONG_NGINX_PROXY_PROXY_BUFFER_SIZE=160k
       - KONG_NGINX_PROXY_PROXY_BUFFERS=64 160k
-      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
-      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTg5MDI0MDAsImV4cCI6MTkxNjY2ODgwMH0.r1dYUfYVb1-TDOsbkLVdzXdrcfhiOWJlEq_nmQGcZTE
+      - SUPABASE_ANON_KEY={{ .U.ANON_KEY }}
+      - SUPABASE_SERVICE_KEY={{ .U.SERVICE_ROLE_KEY }}
       - DASHBOARD_USERNAME=supabase
       - DASHBOARD_PASSWORD=this_password_is_insecure_and_should_be_updated
     entrypoint: bash -c 'eval "echo \"$$(cat /etc/kong/kong.yml)\"" > /tmp/kong.yml && /docker-entrypoint.sh kong docker-start'
@@ -78,7 +77,7 @@ services:
       - GOTRUE_API_PORT=9999
       - API_EXTERNAL_URL=http://localhost:8000
       - GOTRUE_DB_DRIVER=postgres
-      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:{{ .U.POSTGRES_PASSWORD }}@db:5432/postgres
       - GOTRUE_SITE_URL=http://localhost:3000
       - GOTRUE_URI_ALLOW_LIST=
       - GOTRUE_DISABLE_SIGNUP=false
@@ -86,7 +85,7 @@ services:
       - GOTRUE_JWT_AUD=authenticated
       - GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated
       - GOTRUE_JWT_EXP=3600
-      - GOTRUE_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - GOTRUE_JWT_SECRET={{ .U.JWT_SECRET }}
       - GOTRUE_EXTERNAL_EMAIL_ENABLED=true
       - GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED=false
       - GOTRUE_MAILER_AUTOCONFIRM=false
@@ -116,14 +115,13 @@ services:
   rest:
     image: registry.lazycat.cloud/u95011260/postgrest/postgrest:56754e2f0bb91158
     environment:
-      - PGRST_DB_URI=postgres://authenticator:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
+      - PGRST_DB_URI=postgres://authenticator:{{ .U.POSTGRES_PASSWORD }}@db:5432/postgres
       - PGRST_DB_SCHEMAS=public,storage,graphql_public
       - PGRST_DB_ANON_ROLE=anon
-      - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - PGRST_JWT_SECRET={{ .U.JWT_SECRET }}
       - PGRST_DB_USE_LEGACY_GUCS=false
-      - PGRST_APP_SETTINGS_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - PGRST_APP_SETTINGS_JWT_SECRET={{ .U.JWT_SECRET }}
       - PGRST_APP_SETTINGS_JWT_EXP=3600
-      - PGRST_SERVER_PORT=3000
       - PGRST_DB_CHANNEL_ENABLED=false
     command: postgrest
     depends_on:
@@ -136,12 +134,12 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=supabase_admin
-      - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - DB_PASSWORD={{ .U.POSTGRES_PASSWORD }}
       - DB_NAME=postgres
       - DB_AFTER_CONNECT_QUERY=SET search_path TO _realtime
       - DB_ENC_KEY=supabaserealtime
-      - API_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
-      - SECRET_KEY_BASE=UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
+      - API_JWT_SECRET={{ .U.JWT_SECRET }}
+      - SECRET_KEY_BASE={{ .U.SECRET_KEY_BASE }}
       - ERL_AFLAGS=-proto_dist inet_tcp
       - DNS_NODES=''
       - RLIMIT_NOFILE=10000
@@ -160,7 +158,7 @@ services:
         - -o
         - /dev/null
         - -H
-        - "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E"
+        - "Authorization: Bearer {{ .U.ANON_KEY }}"
         - http://localhost:4000/api/tenants/realtime-dev/health
       timeout: 5s
       interval: 5s
@@ -168,11 +166,11 @@ services:
   storage:
     image: registry.lazycat.cloud/u95011260/supabase/storage-api:5bf488e768d809c4
     environment:
-      - ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
-      - SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTg5MDI0MDAsImV4cCI6MTkxNjY2ODgwMH0.r1dYUfYVb1-TDOsbkLVdzXdrcfhiOWJlEq_nmQGcZTE
+      - ANON_KEY={{ .U.ANON_KEY }}
+      - SERVICE_KEY={{ .U.SERVICE_ROLE_KEY }}
       - POSTGREST_URL=http://rest:3000
-      - PGRST_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
-      - DATABASE_URL=postgres://supabase_storage_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
+      - PGRST_JWT_SECRET={{ .U.JWT_SECRET }}
+      - DATABASE_URL=postgres://supabase_storage_admin:{{ .U.POSTGRES_PASSWORD }}@db:5432/postgres
       - FILE_SIZE_LIMIT=52428800
       - STORAGE_BACKEND=file
       - FILE_STORAGE_BACKEND_PATH=/var/lib/storage
@@ -217,7 +215,7 @@ services:
       - PG_META_DB_PORT=5432
       - PG_META_DB_NAME=postgres
       - PG_META_DB_USER=supabase_admin
-      - PG_META_DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - PG_META_DB_PASSWORD={{ .U.POSTGRES_PASSWORD }}
     depends_on:
       - db
       - analytics
@@ -228,11 +226,11 @@ services:
     binds:
       - /lzcapp/pkg/content/functions:/home/deno/functions
     environment:
-      - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - JWT_SECRET={{ .U.JWT_SECRET }}
       - SUPABASE_URL=http://kong:8000
-      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E
-      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTg5MDI0MDAsImV4cCI6MTkxNjY2ODgwMH0.r1dYUfYVb1-TDOsbkLVdzXdrcfhiOWJlEq_nmQGcZTE
-      - SUPABASE_DB_URL=postgresql://postgres:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/postgres
+      - SUPABASE_ANON_KEY={{ .U.ANON_KEY }}
+      - SUPABASE_SERVICE_ROLE_KEY={{ .U.SERVICE_ROLE_KEY }}
+      - SUPABASE_DB_URL=postgresql://postgres:{{ .U.POSTGRES_PASSWORD }}@db:5432/postgres
       - VERIFY_JWT=false
     command: start --main-service /home/deno/functions/main
   analytics:
@@ -246,14 +244,14 @@ services:
       - DB_DATABASE=_supabase
       - DB_HOSTNAME=db
       - DB_PORT=5432
-      - DB_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - DB_PASSWORD={{ .U.POSTGRES_PASSWORD }}
       - DB_SCHEMA=_analytics
-      - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
-      - LOGFLARE_PRIVATE_ACCESS_TOKEN=your-super-secret-and-long-logflare-key-private
+      - LOGFLARE_PUBLIC_ACCESS_TOKEN={{ .U.LOGFLARE_PUBLIC_ACCESS_TOKEN }}
+      - LOGFLARE_PRIVATE_ACCESS_TOKEN={{ .U.LOGFLARE_PRIVATE_ACCESS_TOKEN }}
       - LOGFLARE_SINGLE_TENANT=true
       - LOGFLARE_SUPABASE_MODE=true
       - LOGFLARE_MIN_CLUSTER_SIZE=1
-      - POSTGRES_BACKEND_URL=postgresql://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/_supabase
+      - POSTGRES_BACKEND_URL=postgresql://supabase_admin:{{ .U.POSTGRES_PASSWORD }}@db:5432/_supabase
       - POSTGRES_BACKEND_SCHEMA=_analytics
       - LOGFLARE_FEATURE_FLAG_OVERRIDE=multibackend=true
       - LOGFLARE_GOOGLE_CLOUD_PROJECT_ID=""
@@ -300,11 +298,11 @@ services:
       - POSTGRES_HOST=/var/run/postgresql
       - PGPORT=5432
       - POSTGRES_PORT=5432
-      - PGPASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
-      - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
+      - PGPASSWORD={{ .U.POSTGRES_PASSWORD }}
+      - POSTGRES_PASSWORD={{ .U.POSTGRES_PASSWORD }}
       - PGDATABASE=postgres
       - POSTGRES_DB=postgres
-      - JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - JWT_SECRET={{ .U.JWT_SECRET }}
       - JWT_EXP=3600
       - POSTGRES_LISTEN_ADDRESSES=*
     command: postgres -c log_min_messages=fatal -c listen_addresses='*' -c port=5432 -c unix_socket_directories='/var/run/postgresql' -c shared_preload_libraries='pg_net,pg_stat_statements' -c wal_level=logical
@@ -325,7 +323,7 @@ services:
     binds:
       - /lzcapp/pkg/content/logs/vector.yml:/etc/vector/vector.yml
     environment:
-      - LOGFLARE_PUBLIC_ACCESS_TOKEN=c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k=
+      - LOGFLARE_PUBLIC_ACCESS_TOKEN={{ .U.LOGFLARE_PUBLIC_ACCESS_TOKEN }}
     depends_on:
       - analytics
       - rest
@@ -357,13 +355,13 @@ services:
       - PORT=4000
       - POSTGRES_PORT=5432
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=
-      - DATABASE_URL=ecto://supabase_admin:HGaQSGm95b7adrmrmsN7k3Ak+mv8656bwcCHzdZJjqI=@db:5432/_supabase
+      - POSTGRES_PASSWORD={{ .U.POSTGRES_PASSWORD }}
+      - DATABASE_URL=ecto://supabase_admin:{{ .U.POSTGRES_PASSWORD }}@db:5432/_supabase
       - CLUSTER_POSTGRES=true
-      - SECRET_KEY_BASE=UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
-      - VAULT_ENC_KEY=ZDQzNjgzNzljMTFiNmMyMDk5NDBlYTBh
-      - API_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
-      - METRICS_JWT_SECRET=WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx
+      - SECRET_KEY_BASE={{ .U.SECRET_KEY_BASE }}
+      - VAULT_ENC_KEY={{ .U.VAULT_ENC_KEY }}
+      - API_JWT_SECRET={{ .U.JWT_SECRET }}
+      - METRICS_JWT_SECRET={{ .U.JWT_SECRET }}
       - REGION=local
       - ERL_AFLAGS=-proto_dist inet_tcp
       - POOLER_TENANT_ID=supabase-project

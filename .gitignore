@@ -3,3 +3,12 @@
 /volumes/db/data
 /volumes/db/docker-entrypoint-initdb.d
 /button
+
+# 敏感信息 - 密钥文件
+supabase-secrets.txt
+*.backup
+lzc-deploy-params.yml.backup
+
+# Node.js
+node_modules/
+package-lock.json
