@@ -1,4 +1,5 @@
 *.lpk
+.DS_Store
 
 /volumes/db/data
 /volumes/db/docker-entrypoint-initdb.d

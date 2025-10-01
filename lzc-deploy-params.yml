@@ -17,7 +17,7 @@ params:
     name: JWT 签名密钥
     description: 用于签名和验证 JWT tokens 的密钥
     optional: false
-    default_value: "WfIWPT3OZAz+9W3PaKhYDpqaprbIC7q7f2luYdjg2LEo7FAoIrw2Ot+91UHAvqpx"
+    default_value: "qOn3h7eq3fSUibnC1gyfX0arV3bbYTGh2o/lxTVYOd3ExK98E9Iy4DUPxsnzdPGZqM1CqhcJ8TcB84P/eXLGlA=="
     hidden: true
 
   # 匿名访问密钥
@@ -26,7 +26,7 @@ params:
     name: 匿名访问密钥
     description: 客户端公开使用的 API 密钥，具有匿名角色权限
     optional: false
-    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU4OTAyNDAwLCJleHAiOjE5MTY2Njg4MDB9.78iz-XEBXsqTYbdcsJ91CqTA6Yec9G73l49JS4IaP_E"
+    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU5MzM3MDEzLCJleHAiOjE5MTcwMTcwMTN9.kRdvSunFmmaFdzMtp5TF12DmCfKWiVOT2wqRuo5eDSE"
     hidden: false
 
   # 服务角色密钥
@@ -35,7 +35,7 @@ params:
     name: 服务角色密钥
     description: 服务端使用的 API 密钥，具有完全访问权限，请妥善保管
     optional: false
-    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTg5MDI0MDAsImV4cCI6MTkxNjY2ODgwMH0.r1dYUfYVb1-TDOsbkLVdzXdrcfhiOWJlEq_nmQGcZTE"
+    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTkzMzcwMTMsImV4cCI6MTkxNzAxNzAxM30.iPE8oKnBhwk3LEuuYUk-QpO6YKEjYyH2OwCpwmhwuNE"
     hidden: true
 
   # Logflare 公钥
@@ -44,7 +44,7 @@ params:
     name: Logflare 公钥
     description: Analytics 服务的公共访问令牌
     optional: false
-    default_value: "c89Ev5vBn0QLcyXSdR46BJwvNcN4UdFvVdglRFwhy4k="
+    default_value: "5gTe5JymVe2f4FUNadI+ftbfaNIo7R6Rffnk8xydaUo="
     hidden: true
 
   # Logflare 私钥
@@ -53,7 +53,7 @@ params:
     name: Logflare 私钥
     description: Analytics 服务的私有访问令牌
     optional: false
-    default_value: "your-super-secret-and-long-logflare-key-private"
+    default_value: "HAognYF93gKOl8WKPpXoYK9oUThwLFJ2b9+jrTtBmz6ZhSV9eMneyGBhXfssE2Y0"
     hidden: true
 
   # 基础密钥
@@ -62,7 +62,7 @@ params:
     name: 基础密钥
     description: Realtime 和 Pooler 服务的基础加密密钥
     optional: false
-    default_value: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
+    default_value: "ItYWmA6pXL/7WlOggUo5kcGKGCDAUFfYbl8Tl+yK2y6O0SI5+m/lfXl+1SGCY7ScmVAAF2DEU1Of9/c8XFfFnQ=="
     hidden: true
 
   # Vault 加密密钥
@@ -71,5 +71,5 @@ params:
     name: Vault 加密密钥
     description: Pooler 服务的 Vault 加密密钥
     optional: false
-    default_value: "ZDQzNjgzNzljMTFiNmMyMDk5NDBlYTBh"
+    default_value: "0b8bb54261952ee17ed5358a2e0cd50e"
     hidden: true
