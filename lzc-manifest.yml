@@ -14,7 +14,6 @@ application:
   background_task: true
   routes:
     - /=http://studio:3000/
-    - /analytics/v1/=http://analytics:4000/
   ingress:
     - protocol: tcp
       port: 5432

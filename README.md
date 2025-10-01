@@ -16,7 +16,21 @@
 
 ## 🚀 快速开始
 
-### 1. 生成密钥（生产环境必需）
+### 1. 查看配置状态
+
+每次进入开发环境时，会自动显示配置状态和关键信息：
+
+```bash
+lzc-cli project devshell --contentdir .
+```
+
+或手动运行欢迎脚本：
+
+```bash
+./welcome.sh
+```
+
+### 2. 生成密钥（生产环境必需）
 
 运行密钥生成脚本：
 
@@ -41,7 +55,7 @@ openssl rand -hex 16     # VAULT_ENC_KEY
 # JWT tokens 需要使用 JWT_SECRET 签名，参考 generate-secrets.sh
 ```
 
-### 2. 部署到 LazyCAT
+### 3. 部署到 LazyCAT
 
 ```bash
 # 构建 LPK 包
@@ -54,12 +68,13 @@ lzc-cli project devshell --contentdir .
 # 在 LazyCAT 平台上传 .lpk 文件并安装
 ```
 
-### 3. 访问
+### 4. 访问
 
 部署成功后访问：
 - **Studio 管理界面**: `https://your-domain/`
-- **Kong 管理 API**: `https://your-domain/kong/`
-- **Analytics 面板**: `https://your-domain/analytics/`
+- **Analytics 数据**: 在 Studio 界面中查看（Reports 页面）
+
+> 💡 **注意**: 所有 API 请求都通过 Kong 网关统一处理，无需单独访问各个服务
 
 ## 📝 配置说明
 
