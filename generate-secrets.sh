@@ -64,6 +64,10 @@ generate_secrets() {
     SECRET_KEY_BASE=$(openssl rand -base64 64 | tr -d '\n')
     VAULT_ENC_KEY=$(openssl rand -hex 16)
     
+    # 生成 Kong Dashboard 凭据
+    DASHBOARD_USERNAME="supabase"  # 可以根据需要自定义
+    DASHBOARD_PASSWORD=$(openssl rand -base64 24 | tr -d '\n')  # 生成强密码
+    
     print_success "基础密钥生成完成"
 }
 
@@ -130,6 +134,8 @@ display_secrets() {
     echo "LOGFLARE_PRIVATE_ACCESS_TOKEN: ${LOGFLARE_PRIVATE_ACCESS_TOKEN}"
     echo "SECRET_KEY_BASE: ${SECRET_KEY_BASE}"
     echo "VAULT_ENC_KEY: ${VAULT_ENC_KEY}"
+    echo "DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}"
+    echo "DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}"
     echo ""
 }
 
@@ -157,6 +163,8 @@ update_deploy_params() {
     sed -i.tmp "/id: LOGFLARE_PRIVATE_ACCESS_TOKEN/,/default_value:/ s|default_value: \".*\"|default_value: \"${LOGFLARE_PRIVATE_ACCESS_TOKEN}\"|" lzc-deploy-params.yml
     sed -i.tmp "/id: SECRET_KEY_BASE/,/default_value:/ s|default_value: \".*\"|default_value: \"${SECRET_KEY_BASE}\"|" lzc-deploy-params.yml
     sed -i.tmp "/id: VAULT_ENC_KEY/,/default_value:/ s|default_value: \".*\"|default_value: \"${VAULT_ENC_KEY}\"|" lzc-deploy-params.yml
+    sed -i.tmp "/id: DASHBOARD_USERNAME/,/default_value:/ s|default_value: \".*\"|default_value: \"${DASHBOARD_USERNAME}\"|" lzc-deploy-params.yml
+    sed -i.tmp "/id: DASHBOARD_PASSWORD/,/default_value:/ s|default_value: \".*\"|default_value: \"${DASHBOARD_PASSWORD}\"|" lzc-deploy-params.yml
     
     # 删除临时文件
     rm -f lzc-deploy-params.yml.tmp
@@ -181,11 +189,14 @@ LOGFLARE_PUBLIC_ACCESS_TOKEN="${LOGFLARE_PUBLIC_ACCESS_TOKEN}"
 LOGFLARE_PRIVATE_ACCESS_TOKEN="${LOGFLARE_PRIVATE_ACCESS_TOKEN}"
 SECRET_KEY_BASE="${SECRET_KEY_BASE}"
 VAULT_ENC_KEY="${VAULT_ENC_KEY}"
+DASHBOARD_USERNAME="${DASHBOARD_USERNAME}"
+DASHBOARD_PASSWORD="${DASHBOARD_PASSWORD}"
 
 # 使用说明：
 # 1. 这些密钥已自动更新到 lzc-deploy-params.yml
 # 2. 部署时可以直接使用，或在 LazyCAT 安装界面自定义
 # 3. 生产环境请确保使用强密钥并定期轮换
+# 4. Kong Dashboard 访问地址：https://your-domain/ （使用上述 DASHBOARD_USERNAME 和 DASHBOARD_PASSWORD 登录）
 EOF
     
     print_success "密钥已保存到 ${OUTPUT_FILE}"
@@ -204,15 +215,22 @@ main() {
     generate_jwt_tokens
     display_secrets
     
-    # 询问是否更新文件
-    read -p "是否自动更新 lzc-deploy-params.yml 文件？ (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # 检查是否为自动模式（通过环境变量 AUTO_UPDATE 控制）
+    if [ "$AUTO_UPDATE" = "true" ]; then
+        print_info "自动更新模式，直接更新配置文件"
         update_deploy_params
         save_to_file
     else
-        print_info "已跳过文件更新，请手动复制上述密钥"
-        save_to_file
+        # 询问是否更新文件
+        read -p "是否自动更新 lzc-deploy-params.yml 文件？ (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            update_deploy_params
+            save_to_file
+        else
+            print_info "已跳过文件更新，请手动复制上述密钥"
+            save_to_file
+        fi
     fi
     
     echo ""

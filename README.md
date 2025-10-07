@@ -30,9 +30,20 @@ lzc-cli project devshell --contentdir .
 ./welcome.sh
 ```
 
-### 2. 生成密钥（生产环境必需）
+### 2. 生成密钥
 
-运行密钥生成脚本：
+**自动生成（推荐）：**
+
+构建时会自动生成新的安全密钥，无需手动操作：
+
+```bash
+# 直接构建，密钥会自动生成
+lzc-cli project build
+```
+
+**手动生成：**
+
+如果需要手动生成密钥，运行：
 
 ```bash
 chmod +x generate-secrets.sh
@@ -41,7 +52,7 @@ chmod +x generate-secrets.sh
 
 脚本会自动生成所有必需的密钥并更新 `lzc-deploy-params.yml` 文件。
 
-或者手动生成：
+**完全手动配置：**
 
 ```bash
 # 生成基础密钥

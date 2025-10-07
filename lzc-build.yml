@@ -1,9 +1,22 @@
 # Supabase LazyCAT 构建配置
 # 整个文件中，可以通过 ${var} 的方式，使用 manifest 字段指定的文件定义的值
 
-# buildscript: Supabase 不需要构建步骤，直接使用容器镜像
-# 对于 Supabase，我们只需要准备配置文件和卷数据
-buildscript: ""
+# buildscript: 在构建时自动生成新的密钥
+# 每次构建 lpk 包时都会生成新的随机密钥，确保安全性
+buildscript: |
+  #!/bin/bash
+  echo "🔐 正在生成新的安全密钥..."
+  
+  # 检查是否存在密钥生成脚本
+  if [ -f "generate-secrets.sh" ]; then
+    chmod +x generate-secrets.sh
+    # 设置自动更新模式，跳过交互式确认
+    export AUTO_UPDATE=true
+    ./generate-secrets.sh
+    echo "✅ 密钥生成完成"
+  else
+    echo "⚠️  未找到 generate-secrets.sh，使用现有配置"
+  fi
 
 # manifest: 指定 lpk 包的 manifest.yml 文件路径
 manifest: ./lzc-manifest.yml

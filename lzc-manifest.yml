@@ -73,8 +73,8 @@ services:
       - KONG_NGINX_PROXY_PROXY_BUFFERS=64 160k
       - SUPABASE_ANON_KEY={{ .U.ANON_KEY }}
       - SUPABASE_SERVICE_KEY={{ .U.SERVICE_ROLE_KEY }}
-      - DASHBOARD_USERNAME=supabase
-      - DASHBOARD_PASSWORD=this_password_is_insecure_and_should_be_updated
+      - DASHBOARD_USERNAME={{ .U.DASHBOARD_USERNAME }}
+      - DASHBOARD_PASSWORD={{ .U.DASHBOARD_PASSWORD }}
     entrypoint: bash -c 'sleep 10 && eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
 
   auth:
