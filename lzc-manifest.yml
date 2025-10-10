@@ -9,6 +9,19 @@ homepage:
   Supabase 是 Postgres 开发平台。您可以使用 Postgres 数据库、身份验证、即时
   API、边缘函数、实时订阅、存储和向量嵌入来启动您的项目。
 author: supabase
+locales:
+  zh:
+    name: "Supabase"
+    description: "开箱即用的开源后端：以 PostgreSQL 为核心，提供认证、实时、存储、自动 API 与 Serverless，使你用最少后端工作量快速交付现代 Web/移动/AI 应用。"
+  zh_CN:
+    name: "Supabase"
+    description: "开箱即用的开源后端：以 PostgreSQL 为核心，提供认证、实时、存储、自动 API 与 Serverless，使你用最少后端工作量快速交付现代 Web/移动/AI 应用。"
+  en:
+    name: "Supabase"
+    description: "Open-source backend-as-a-service platform built on PostgreSQL, providing authentication, real-time, storage, auto-generated APIs, and serverless functions to rapidly ship modern web/mobile/AI applications with minimal backend work."
+  ja:
+    name: "Supabase"
+    description: "PostgreSQL をコアに構築されたオープンソースのバックエンドサービス。認証、リアルタイム、ストレージ、自動生成 API、サーバーレス機能を提供し、最小限のバックエンド作業で最新の Web/モバイル/AI アプリケーションを迅速に構築できます。"
 application:
   subdomain: supabase
   background_task: true
