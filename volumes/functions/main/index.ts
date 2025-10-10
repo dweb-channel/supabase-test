@@ -1,4 +1,5 @@
-import * as jose from "jsr:@panva/jose";
+// 使用 esm.sh CDN 替代 jsr.io，解决国内网络访问问题
+import * as jose from "https://esm.sh/jose@5.2.0";
 
 // EdgeRuntime is globally available in Supabase Edge Runtime
 declare const EdgeRuntime: any;
