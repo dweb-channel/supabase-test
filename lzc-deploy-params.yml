@@ -17,7 +17,7 @@ params:
     name: JWT 签名密钥
     description: 用于签名和验证 JWT tokens 的密钥
     optional: false
-    default_value: "qT+jJzTj19EhKiqGRQIq3LHS8lsjhueluZXWos6te/zVu2kPk0JjqL0de0G4BiqqPHWbKUL1TL4gYxFSbnit1Q=="
+    default_value: "IRl9Nu7Iic88DHTtgs56JuKwkaqiZaV+QxVL6uW8g+Rd0Pyo9KDlhG8LWawtSJhXWffTw30mwl9Jsd0x0ZI6FA=="
     hidden: true
 
   # 匿名访问密钥
@@ -26,7 +26,7 @@ params:
     name: 匿名访问密钥
     description: 客户端公开使用的 API 密钥，具有匿名角色权限
     optional: false
-    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU5ODMzNTMyLCJleHAiOjE5MTc1MTM1MzJ9.nQ_qhv5uoJGnZOz8kw6Q5v3YXbAl0nrkeZqnTYHAYzA"
+    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzYwMDk5MDIzLCJleHAiOjE5MTc3NzkwMjN9.8oD2zsy-8K6Se5D4lF0vxXfRKk5sDHJ5wVfXEtrPVCQ"
     hidden: true
 
   # 服务角色密钥
@@ -35,7 +35,7 @@ params:
     name: 服务角色密钥
     description: 服务端使用的 API 密钥，具有完全访问权限，请妥善保管
     optional: false
-    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTk4MzM1MzIsImV4cCI6MTkxNzUxMzUzMn0.4qAoDwBzO3kgT06terhzn0qBWT5AOIHU4hpCYNzqDsk"
+    default_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NjAwOTkwMjMsImV4cCI6MTkxNzc3OTAyM30.8gS09SZUaUh8gjGBEl6QdUXXB8BYh_EVZmwbwubX6Ic"
     hidden: true
 
   # Logflare 公钥
@@ -44,7 +44,7 @@ params:
     name: Logflare 公钥
     description: Analytics 服务的公共访问令牌
     optional: false
-    default_value: "A2Pth1WjRZyXrBSJ1QxOnrE8O/NYeBgvw/maKoOq2eY="
+    default_value: "n+fsZzV7UrXx3a8ZeRofm0Xhry/AXXo7vyOMs9a6BD4="
     hidden: true
 
   # Logflare 私钥
@@ -53,7 +53,7 @@ params:
     name: Logflare 私钥
     description: Analytics 服务的私有访问令牌
     optional: false
-    default_value: "WtxeKpnKQzRgs81sFKL+P8dVAIg2xM349uqfM0onLgV0znGjVtLcqdFXK6/kim0V"
+    default_value: "2czFheRqEgmweE/Oj9B+O1VFEYN3dgoSyENjDwzDIdXCTDGVuEXgEqEm3dHhmBrk"
     hidden: true
 
   # 基础密钥
@@ -62,7 +62,7 @@ params:
     name: 基础密钥
     description: Realtime 和 Pooler 服务的基础加密密钥
     optional: false
-    default_value: "AypG2vt5S9ZsAcppdZnGNzweTguxilJvXeqr6JHpzmmrb0p/t09EartFP0X8anyxl0GJfRt/ZVS4ji6av5Itgw=="
+    default_value: "y5ebTsCAkyC3Qi6/OVWQOh/DLsA/EqnRZMj1E7terg1gxkITj2vu+HkSTujjA+1sJBLwf/393BaMTa+bsi8aSg=="
     hidden: true
 
   # Vault 加密密钥
@@ -71,7 +71,7 @@ params:
     name: Vault 加密密钥
     description: Pooler 服务的 Vault 加密密钥
     optional: false
-    default_value: "b519f915549bfd1c817168c34b6efea3"
+    default_value: "dd5c19ffcb398a7c569ebb77592203b4"
     hidden: true
 
   # Kong Dashboard 用户名
@@ -87,7 +87,7 @@ params:
   - id: DASHBOARD_PASSWORD
     type: string
     name: Dashboard 密码
-    description: Kong 管理界面的登录密码，生产环境请务必修改
+    description: Kong 管理界面的登录密码，生产环境请务必修改,请勿设置纯数字
     optional: false
-    default_value: "DBtrEtKjg1om9lHYXc++AlMV9lFC26eR"
+    default_value: "uAProK5hCAo5ynS8+N1fCFVaKHdFuwYT"
     hidden: false
